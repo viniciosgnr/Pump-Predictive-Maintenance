@@ -1,12 +1,43 @@
+# Load libraries
 import pandas as pd
-from joblib import load
+import numpy as np
 import io
+import os
+from joblib import load
 from flask import Flask, render_template, request, session, send_file
 from flask_session import Session
 from tempfile import mkdtemp
-import os
+from keras.models import load_model
+from keras import backend as K
 
+# instantiate flask 
 app = Flask(__name__)
+
+
+
+# we need to redefine our metric function in order 
+# to use it when loading the model
+# Define F1 measures: F1 = 2 * (precision * recall) / (precision + recall)
+def custom_f1(y_true, y_pred):    
+    def recall_m(y_true, y_pred):
+        TP = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        Positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        
+        recall = TP / (Positives+K.epsilon())    
+        return recall 
+    
+    
+    def precision_m(y_true, y_pred):
+        TP = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        Pred_Positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    
+        precision = TP / (Pred_Positives+K.epsilon())
+        return precision 
+    
+    precision, recall = precision_m(y_true, y_pred), recall_m(y_true, y_pred)
+    
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -28,22 +59,21 @@ Session(app)
 
 # sensors
 FINAL_SENSORS = [
-    "sensor_00",
-    "sensor_04",
-    "sensor_06",
-    "sensor_07",
-    "sensor_08",
-    "sensor_09",
-    "sensor_10",
-    "sensor_11",
-    "sensor_12",
-]
+    'Temperature',
+    'Pressure',
+    'VibrationX',
+    'VibrationY',
+    'VibrationZ',
+    'Frequency'
+    ]
 
-# loading the minimax scaler
-SCALER = load("model/minimax_scaler.joblib")
+# loading the minmax scaler
+SCALER = load("model/minmax_scaler.joblib")
 # loading the trained model
-MODEL = load("model/random_forest.joblib")
+#MODEL = load("model/random_forest.joblib")
+MODEL = load_model("model/Shape_prediction_model.h5", custom_objects={'custom_f1':custom_f1})
 
+  
 # home page
 @app.route("/")
 def index():
@@ -75,7 +105,7 @@ def predict():
             "load_data.html", type="danger", message="Please enter a valid input"
         )
 
-    if count == 9:
+    if count == 6:
         return render_template(
             "load_data.html", type="danger", message="All the values are missing!"
         )
@@ -85,28 +115,27 @@ def predict():
     # replacing empty fields with -1
     df = df.replace("", -1)
 
-    # minimax scaling
+    # minmax scaling
     df = SCALER.transform(df)
     # prediction
     y = MODEL.predict(df)
     # getting probability values
-    prob = MODEL.predict_proba(df)
-    status = int(y[0])
-    prob = prob[0][status]
+    status = np.rint(y)[0][0]
+    prob = y[0][0]
 
     # if class is 0 (Normal)
-    if y[0] == 0:
+    if status == 0:
         return render_template(
             "load_data.html",
             type="success",
-            message=f"Pump will be okay with probability {round(prob, 3)}",
+            message=f"Machine will be okay with probability {round(prob, 3)}",
         )
     # if class is 1 (Broken)
     else:
         return render_template(
             "load_data.html",
             type="danger",
-            message=f"Pump is going to fail with probability {round(prob, 3)}",
+            message=f"Machine is going to fail with probability {round(prob, 3)}",
         )
 
 

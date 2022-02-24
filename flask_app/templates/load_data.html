@@ -21,37 +21,28 @@
       <table class="table table-responsive">
         <thead>
           <tr>
-            <th scope="col">sensor_00</th>
-            <th scope="col">sensor_04</th>
-            <th scope="col">sensor_06</th>
-            <th scope="col">sensor_07</th>
-            <th scope="col">sensor_08</th>
-            <th scope="col">sensor_09</th>
-            <th scope="col">sensor_10</th>
-            <th scope="col">sensor_11</th>
-            <th scope="col">sensor_12</th>
+            <th scope="col">Temperature</th>
+            <th scope="col">Pressure</th>
+            <th scope="col">VibrationX</th>
+            <th scope="col">VibrationY</th>
+            <th scope="col">VibrationZ</th>
+            <th scope="col">Frequency</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <form autocomplete="off" action='/predict' method="POST">
-              <td><input type="text" name="sensor_00" class="form-control" placeholder="sensor_00" style="width:100px;">
+              <td><input type="text" name="Temperature" class="form-control" placeholder="Temperature" style="width:120px;">
               </td>
-              <td><input type="text" name="sensor_04" class="form-control" placeholder="sensor_04" style="width:100px;">
+              <td><input type="text" name="Pressure" class="form-control" placeholder="Pressure" style="width:100px;">
               </td>
-              <td><input type="text" name="sensor_06" class="form-control" placeholder="sensor_06" style="width:100px;">
+              <td><input type="text" name="VibrationX" class="form-control" placeholder="VibrationX" style="width:100px;">
               </td>
-              <td><input type="text" name="sensor_07" class="form-control" placeholder="sensor_07" style="width:100px;">
+              <td><input type="text" name="VibrationY" class="form-control" placeholder="VibrationY" style="width:100px;">
               </td>
-              <td><input type="text" name="sensor_08" class="form-control" placeholder="sensor_08" style="width:100px;">
+              <td><input type="text" name="VibrationZ" class="form-control" placeholder="VibrationZ" style="width:100px;">
               </td>
-              <td><input type="text" name="sensor_09" class="form-control" placeholder="sensor_09" style="width:100px;">
-              </td>
-              <td><input type="text" name="sensor_10" class="form-control" placeholder="sensor_10" style="width:100px;">
-              </td>
-              <td><input type="text" name="sensor_11" class="form-control" placeholder="sensor_11" style="width:100px;">
-              </td>
-              <td><input type="text" name="sensor_12" class="form-control" placeholder="sensor_12" style="width:100px;">
+              <td><input type="text" name="Frequency" class="form-control" placeholder="Frequency" style="width:100px;">
               </td>
           </tr>
         </tbody>
